@@ -1,6 +1,6 @@
 # Jevort
 
-A Pi extension that uses TypeSafe AI's Jev (`jev-latest`) to recommend a reasoning-effort tier for each user prompt and applies a compatible level to the active model.
+A Pi extension that uses TypeSafe AI's Jev (`jev-latest`) to recommend a reasoning-effort tier for each user prompt. By default it only shows a notification; it never adds slash commands or changes the thinking level unless automatic application is explicitly enabled.
 
 ## Requirements
 
@@ -32,16 +32,16 @@ pi --extension ./jevort.ts
 
 ## Behavior
 
-Before each non-empty agent turn, the extension sends the prompt to TypeSafe and asks Jev to choose among:
+On Pi's `before_agent_start` event, the extension sends each non-empty prompt to TypeSafe and asks Jev to choose among:
 
 - **low** — short, scoped task or tiny reversible edit
 - **medium** — routine work with little architectural uncertainty
 - **high** — complex debugging/design or meaningful integration risk
 - **xhigh** — broad architecture, subtle correctness, or high stakes
 
-A recommendation is accepted only when its selected-choice probability is at least `0.5`; otherwise the classifier uses `medium`. The result is adapted to Pi's common thinking levels using the active model's `reasoning` capability and `thinkingLevelMap`: unsupported levels are mapped to the nearest available tier. A model without reasoning support is left unchanged. If the TypeSafe request fails, the extension leaves the current level unchanged and reports a warning.
+A recommendation is accepted only when its selected-choice probability is at least `0.5`; otherwise the classifier uses `medium`. The suggestion is adapted to Pi's common thinking levels using the active model's `reasoning` capability and `thinkingLevelMap`: unsupported levels are mapped to the nearest available tier. A model without reasoning support is left unchanged. If the TypeSafe request fails, the extension leaves the current level unchanged and reports a warning.
 
-The `/effort` command displays the current level. `/effort <level>` manually sets a level supported by the active model. The available levels may differ by provider and model. Pi exposes a shared level vocabulary, while the provider-specific `thinkingLevelMap` maps those levels to the provider's native values.
+By default Jevort only notifies you of its suggestion; it does not change the active thinking level. Use Pi's built-in `/thinking` control to apply a suggestion manually. To control automatic application during a Pi session, use `/jevort` (equivalent to `/jevort toggle`), `/jevort on`, `/jevort off`, or `/jevort status`. This runtime setting resets when Pi restarts. To enable auto-application at startup, set `JEVORT_AUTO_APPLY=1` (accepted values are `1`, `true`, `yes`, and `on`) in Pi's environment. The extension checks the active model's reasoning support and `thinkingLevelMap`, maps unavailable recommendations to the nearest supported tier, and leaves the current setting unchanged when reasoning is unavailable.
 
 ## Privacy and network behavior
 

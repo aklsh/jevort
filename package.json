@@ -1,6 +1,6 @@
 {
   "name": "jevort",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A Pi extension that selects model-compatible reasoning effort with TypeSafe Jev",
   "license": "MIT",
   "author": "aklsh",
@@ -9,12 +9,39 @@
     "url": "git+https://github.com/aklsh/jevort.git"
   },
   "homepage": "https://github.com/aklsh/jevort#readme",
-  "bugs": { "url": "https://github.com/aklsh/jevort/issues" },
-  "keywords": ["pi-package", "pi-extension", "effort", "reasoning", "typesafe-ai"],
+  "bugs": {
+    "url": "https://github.com/aklsh/jevort/issues"
+  },
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "effort",
+    "reasoning",
+    "typesafe-ai"
+  ],
   "type": "module",
-  "scripts": { "typecheck": "tsc --noEmit" },
-  "dependencies": { "@typesafe-ai/sdk": "^0.6.0" },
-  "peerDependencies": { "@earendil-works/pi-coding-agent": "*" },
-  "devDependencies": { "@earendil-works/pi-coding-agent": "*", "@types/node": "^22.0.0", "typescript": "^5.7.0" },
-  "pi": { "extensions": ["./jevort.ts"] }
+  "files": [
+    "jevort.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@typesafe-ai/sdk": "^0.6.0"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  },
+  "pi": {
+    "extensions": [
+      "./jevort.ts"
+    ]
+  }
 }

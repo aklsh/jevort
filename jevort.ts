@@ -9,8 +9,8 @@ const EFFORTS = {
 } as const;
 type Effort = keyof typeof EFFORTS;
 const levels = ["low", "medium", "high", "xhigh"] as const;
-const manualLevels = ["off", "minimal", "low", "medium", "high", "xhigh", "max"] as const;
 const FALLBACK: Effort = "medium";
+let autoApply = /^(1|true|yes|on)$/i.test(process.env.JEVORT_AUTO_APPLY ?? "");
 
 function chooseEffort(answer: { choice: string; probabilities: Record<string, number> } | undefined): Effort {
   if (!answer || !(answer.choice in EFFORTS)) return FALLBACK;
@@ -52,6 +52,21 @@ async function decide(prompt: string, model?: string): Promise<Effort> {
 }
 
 export default function (pi: ExtensionAPI) {
+  pi.registerCommand("jevort", {
+    description: "Toggle Jevort automatic effort application (on/off/status)",
+    handler: async (args, ctx) => {
+      const action = args.trim().toLowerCase();
+      if (action === "on") autoApply = true;
+      else if (action === "off") autoApply = false;
+      else if (action === "toggle" || action === "") autoApply = !autoApply;
+      else if (action !== "status") {
+        ctx.ui.notify("Usage: /jevort [on|off|toggle|status]", "warning");
+        return;
+      }
+      ctx.ui.notify(`Jevort auto-apply is ${autoApply ? "on" : "off"}`, "info");
+    },
+  });
+
   pi.on("before_agent_start", async (event, ctx) => {
     if (!event.prompt.trim()) return;
     try {
@@ -62,36 +77,19 @@ export default function (pi: ExtensionAPI) {
         ctx.ui.notify("Jev made a recommendation, but the active model does not support reasoning effort; keeping current setting", "warning");
         return;
       }
-      pi.setThinkingLevel(effort);
+      if (autoApply) pi.setThinkingLevel(effort);
+      const suggestion = effort === recommendation
+        ? effort
+        : `${recommendation} (nearest supported: ${effort})`;
       ctx.ui.notify(
-        effort === recommendation
-          ? `Jev selected ${effort} thinking for this turn`
-          : `Jev suggested ${recommendation}; using supported ${effort} for this model`,
-        "info",
+        autoApply
+          ? `Jev suggested ${suggestion}; applied for this turn`
+          : `Jev suggests ${suggestion} thinking. Use Pi's /thinking control to apply it.`,
+        "warning",
       );
     } catch (error) {
       ctx.ui.notify(`Jev effort recommendation unavailable; keeping current level (${String(error)})`, "warning");
     }
   });
 
-  pi.registerCommand("effort", {
-    description: "Show or set Pi's reasoning effort",
-    handler: async (args, ctx) => {
-      const requested = args.trim();
-      if (!requested) {
-        ctx.ui.notify(`Current thinking level: ${pi.getThinkingLevel()}`, "info");
-        return;
-      }
-      const supported = supportedEfforts(ctx.model);
-      const allowed = ctx.model?.reasoning
-        ? ["off", "minimal", ...supported, ...(ctx.model.thinkingLevelMap?.max !== undefined && ctx.model.thinkingLevelMap.max !== null ? ["max"] : [])]
-        : ["off"];
-      if (!(manualLevels as readonly string[]).includes(requested) || !allowed.includes(requested)) {
-        ctx.ui.notify(`Unsupported for the active model. Available: ${allowed.join(" | ")}`, "warning");
-        return;
-      }
-      pi.setThinkingLevel(requested as (typeof manualLevels)[number]);
-      ctx.ui.notify(`Thinking level set to ${requested}`, "info");
-    },
-  });
 }
