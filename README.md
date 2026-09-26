@@ -60,4 +60,6 @@ npm run typecheck
 
 The npm version comes with the selected nvm Node installation; it is not pinned separately. `.envrc` also loads an optional, ignored `.envrc.local` for local secrets (such as `TYPESAFE_API_KEY`). If nvm is installed outside `~/.nvm`, set `NVM_DIR` before entering the checkout. Without direnv, run `nvm use` manually.
 
+To publish, update the version in `package.json` and `package-lock.json`, then create and push a matching tag (for example, `v0.1.1`). The GitHub Actions workflow verifies the tag matches the package version, runs the typecheck, publishes to npm using trusted publishing, and creates a GitHub release with generated notes. You can also run **Publish to npm and GitHub** manually from Actions and supply an existing tag; it publishes that tag's commit, not the selected branch. Configure npm trusted publishing for this repository and `.github/workflows/publish.yml` before publishing. Rerunning after npm has published a version will fail because npm versions cannot be republished.
+
 The typecheck requires the dependencies from `package.json` to be installed. The extension relies on Pi's `before_agent_start` event and the model metadata exposed on its extension context. The package manifest declares `jevort.ts` as its Pi extension entrypoint and includes the TypeSafe SDK as a runtime dependency.
