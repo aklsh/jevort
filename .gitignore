@@ -1,6 +1,6 @@
 node_modules/
+.npmrc
 dist/
-.envrc
 .envrc.local
 .env
 .env.*.local

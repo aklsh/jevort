@@ -49,8 +49,15 @@ The prompt text is sent to TypeSafe for classification. The API key is read from
 
 ## Development
 
+The tracked `.envrc` uses [direnv's Node layout](https://github.com/direnv/direnv/wiki/Node) and [nvm](https://github.com/nvm-sh/nvm) to select the Node version pinned in `.nvmrc` and add `node_modules/.bin` to `PATH`. Install nvm and direnv, enable direnv's shell hook, then from this checkout run:
+
 ```sh
+nvm install
+direnv allow
+npm ci
 npm run typecheck
 ```
+
+The npm version comes with the selected nvm Node installation; it is not pinned separately. `.envrc` also loads an optional, ignored `.envrc.local` for local secrets (such as `TYPESAFE_API_KEY`). If nvm is installed outside `~/.nvm`, set `NVM_DIR` before entering the checkout. Without direnv, run `nvm use` manually.
 
 The typecheck requires the dependencies from `package.json` to be installed. The extension relies on Pi's `before_agent_start` event and the model metadata exposed on its extension context. The package manifest declares `jevort.ts` as its Pi extension entrypoint and includes the TypeSafe SDK as a runtime dependency.
